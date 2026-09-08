@@ -1,0 +1,53 @@
+# Runs the whole stack: Postgres, the API (migrated + seeded on start) and the web UI.
+#   docker compose up --build
+# Then open http://localhost:5173
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cleen-db
+    environment:
+      POSTGRES_USER: cleen
+      POSTGRES_PASSWORD: cleen
+      POSTGRES_DB: cleen
+    # Published on 5433 so it does not collide with a Postgres already running on 5432.
+    ports:
+      - '5433:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/init-test-db.sh:/docker-entrypoint-initdb.d/init-test-db.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cleen -d cleen']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+    container_name: cleen-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://cleen:cleen@db:5432/cleen?schema=public
+      JWT_SECRET: docker-compose-dev-secret-change-me
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - '4000:4000'
+
+  web:
+    build:
+      context: ./web
+      args:
+        # Baked in at build time: Vite inlines env vars into the static bundle.
+        VITE_API_URL: http://localhost:4000
+    container_name: cleen-web
+    depends_on:
+      - api
+    ports:
+      - '5173:80'
+
+volumes:
+  db-data:
