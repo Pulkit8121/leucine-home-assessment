@@ -1,0 +1,117 @@
+// Prisma schema for the Equipment Cleaning Log.
+//
+// Three concerns are modelled here:
+//   1. Equipment                     — the physical assets that get cleaned.
+//   2. CleaningRecord                — one cleaning event for one piece of equipment.
+//   3. AuditEntry (+ AuditChange)    — the immutable regulatory trail of who changed
+//                                      what, when, and from which value to which value.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EquipmentStatus {
+  ACTIVE
+  RETIRED
+}
+
+enum CleaningStatus {
+  PENDING
+  VERIFIED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  cleaningRecords CleaningRecord[] @relation("RecordCleanedBy")
+  auditEntries    AuditEntry[]
+
+  @@map("users")
+}
+
+model Equipment {
+  id        String          @id @default(uuid()) @db.Uuid
+  name      String
+  code      String          @unique
+  status    EquipmentStatus @default(ACTIVE)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  cleaningRecords CleaningRecord[]
+
+  @@index([status])
+  @@map("equipment")
+}
+
+model CleaningRecord {
+  id          String         @id @default(uuid()) @db.Uuid
+  equipmentId String         @db.Uuid
+  // Denormalised display name of the operator who performed the cleaning.
+  // Kept as text (not only a FK) because a cleaning log is a regulatory record:
+  // it must still read correctly if the user account is later renamed or removed.
+  cleanedBy   String
+  cleanedById String?        @db.Uuid
+  cleanedAt   DateTime
+  method      String
+  notes       String?
+  status      CleaningStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  equipment     Equipment    @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  cleanedByUser User?        @relation("RecordCleanedBy", fields: [cleanedById], references: [id], onDelete: SetNull)
+  auditEntries  AuditEntry[]
+
+  // Supports the keyset pagination ordering (cleanedAt DESC, id DESC) per equipment,
+  // and the same ordering filtered by status.
+  @@index([equipmentId, cleanedAt(sort: Desc), id(sort: Desc)])
+  @@index([equipmentId, status, cleanedAt(sort: Desc), id(sort: Desc)])
+  @@map("cleaning_records")
+}
+
+model AuditEntry {
+  id               String      @id @default(uuid()) @db.Uuid
+  cleaningRecordId String      @db.Uuid
+  action           AuditAction
+  // Actor identity is snapshotted as text for the same regulatory reason as cleanedBy.
+  actorId          String?     @db.Uuid
+  actorName        String
+  actorEmail       String
+  createdAt        DateTime    @default(now())
+
+  cleaningRecord CleaningRecord @relation(fields: [cleaningRecordId], references: [id], onDelete: Cascade)
+  actor          User?          @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  changes        AuditChange[]
+
+  @@index([cleaningRecordId, createdAt(sort: Desc), id(sort: Desc)])
+  @@map("audit_entries")
+}
+
+// One row per field that actually changed. Values are stored as text snapshots so the
+// trail stays readable even if the column type or enum values evolve later.
+model AuditChange {
+  id           String  @id @default(uuid()) @db.Uuid
+  auditEntryId String  @db.Uuid
+  field        String
+  oldValue     String?
+  newValue     String?
+
+  auditEntry AuditEntry @relation(fields: [auditEntryId], references: [id], onDelete: Cascade)
+
+  @@index([auditEntryId])
+  @@map("audit_changes")
+}
