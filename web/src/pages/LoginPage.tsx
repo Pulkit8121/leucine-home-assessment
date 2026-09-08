@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ApiRequestError } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import { LogoMark } from '../components/icons';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -24,51 +25,63 @@ export function LoginPage() {
     }
   }
 
+  function fillDemo(role: 'operator' | 'supervisor') {
+    setEmail(`${role}@cleen.test`);
+    setPassword('password123');
+  }
+
   return (
     <div className="login-page">
-      <div className="panel login-card">
-        <div className="panel-body">
-          <h1>Equipment Cleaning Log</h1>
-          <p className="subtitle" style={{ color: 'var(--text-muted)', marginTop: 0 }}>
-            Sign in to record and verify cleanings.
-          </p>
+      <div className="login-card">
+        <div className="login-brand">
+          <LogoMark size={40} />
+        </div>
+        <h1>Equipment Cleaning Log</h1>
+        <p className="login-subtitle">Sign in to record and verify cleanings.</p>
 
-          <form onSubmit={onSubmit} style={{ display: 'grid', gap: 14, marginTop: 16 }}>
-            {error ? <p className="alert">{error}</p> : null}
+        <form onSubmit={onSubmit} className="login-form">
+          {error ? <p className="alert">{error}</p> : null}
 
-            <div className="field">
-              <label htmlFor="login-email">Email</label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <div className="field">
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className="field">
-              <label htmlFor="login-password">Password</label>
-              <input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+          <div className="field">
+            <label htmlFor="login-password">Password</label>
+            <input
+              id="login-password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Signing in…' : 'Sign in'}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+
+        <div className="login-demo">
+          <span>Try a seeded account:</span>
+          <div className="login-demo-buttons">
+            <button type="button" className="btn btn-sm" onClick={() => fillDemo('operator')}>
+              Operator
             </button>
-          </form>
-
-          <p className="hint">
-            Seeded accounts: <code>operator@cleen.test</code> and{' '}
-            <code>supervisor@cleen.test</code>, both with password <code>password123</code>.
-          </p>
+            <button type="button" className="btn btn-sm" onClick={() => fillDemo('supervisor')}>
+              Supervisor
+            </button>
+          </div>
+          <p className="hint">Password for both: <code>password123</code></p>
         </div>
       </div>
     </div>

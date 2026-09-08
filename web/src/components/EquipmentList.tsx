@@ -5,6 +5,7 @@ import { ApiRequestError } from '../api/client';
 import type { Equipment, EquipmentStatus } from '../api/types';
 import { EquipmentStatusBadge } from './StatusBadge';
 import { Modal } from './Modal';
+import { FlaskIcon, PlusIcon, SearchIcon } from './icons';
 
 interface EquipmentListProps {
   selectedId: string | null;
@@ -31,7 +32,8 @@ export function EquipmentList({ selectedId, onSelect, canEdit }: EquipmentListPr
       <div className="panel-header">
         <h2 id="equipment-heading">Equipment</h2>
         {canEdit ? (
-          <button type="button" className="btn btn-sm" onClick={() => setCreating(true)}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
+            <PlusIcon size={14} />
             Add
           </button>
         ) : null}
@@ -40,13 +42,16 @@ export function EquipmentList({ selectedId, onSelect, canEdit }: EquipmentListPr
       <div className="toolbar">
         <div className="field" style={{ flex: 1 }}>
           <label htmlFor="equipment-search">Search</label>
-          <input
-            id="equipment-search"
-            type="search"
-            placeholder="Name or code"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <div className="input-with-icon">
+            <SearchIcon size={15} className="input-icon" />
+            <input
+              id="equipment-search"
+              type="search"
+              placeholder="Name or code"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
         <div className="field">
           <label htmlFor="equipment-status">Status</label>
@@ -62,7 +67,13 @@ export function EquipmentList({ selectedId, onSelect, canEdit }: EquipmentListPr
         </div>
       </div>
 
-      {query.isPending ? <p className="loading">Loading equipment…</p> : null}
+      {query.isPending ? (
+        <div className="skeleton-list">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skeleton-row" />
+          ))}
+        </div>
+      ) : null}
       {query.isError ? <p className="empty">Could not load equipment.</p> : null}
       {query.data?.length === 0 ? <p className="empty">No equipment matches.</p> : null}
 
@@ -75,10 +86,16 @@ export function EquipmentList({ selectedId, onSelect, canEdit }: EquipmentListPr
                 onClick={() => onSelect(item)}
                 aria-current={item.id === selectedId}
               >
-                <div className="name">
-                  {item.name} <EquipmentStatusBadge status={item.status} />
-                </div>
-                <div className="code">{item.code}</div>
+                <span className={`equipment-icon status-${item.status.toLowerCase()}`}>
+                  <FlaskIcon size={16} />
+                </span>
+                <span className="equipment-info">
+                  <span className="name-row">
+                    <span className="name">{item.name}</span>
+                    <EquipmentStatusBadge status={item.status} />
+                  </span>
+                  <span className="code">{item.code}</span>
+                </span>
               </button>
             </li>
           ))}

@@ -7,6 +7,7 @@ import { formatDateTime } from '../lib/format';
 import { AuditTrail } from './AuditTrail';
 import { CleaningRecordForm } from './CleaningRecordForm';
 import { CleaningStatusBadge } from './StatusBadge';
+import { ArrowRightIcon, ClipboardIcon, HistoryIcon, PencilIcon, PlusIcon } from './icons';
 
 const PAGE_SIZE = 10;
 
@@ -57,6 +58,7 @@ export function CleaningRecordsPanel({ equipment, currentUserName }: CleaningRec
         </div>
         {currentUserName ? (
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
+            <PlusIcon size={14} />
             Add cleaning record
           </button>
         ) : null}
@@ -77,10 +79,20 @@ export function CleaningRecordsPanel({ equipment, currentUserName }: CleaningRec
         </div>
       </div>
 
-      {query.isPending ? <p className="loading">Loading records…</p> : null}
+      {query.isPending ? (
+        <div className="skeleton-list" style={{ padding: 16 }}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="skeleton-row skeleton-row-wide" />
+          ))}
+        </div>
+      ) : null}
       {query.isError ? <p className="alert" style={{ margin: 16 }}>Could not load records.</p> : null}
       {!query.isPending && records.length === 0 ? (
-        <p className="empty">No cleaning records{statusFilter ? ' with this status' : ''} yet.</p>
+        <div className="empty-state">
+          <ClipboardIcon size={36} />
+          <h3>No cleaning records{statusFilter ? ' with this status' : ''}</h3>
+          <p>Records logged for this equipment will show up here.</p>
+        </div>
       ) : null}
 
       {records.length > 0 ? (
@@ -113,10 +125,12 @@ export function CleaningRecordsPanel({ equipment, currentUserName }: CleaningRec
                   <td className="actions">
                     {currentUserName ? (
                       <button type="button" className="btn-link" onClick={() => setEditing(record)}>
+                        <PencilIcon size={13} />
                         Edit
                       </button>
                     ) : null}
                     <button type="button" className="btn-link" onClick={() => setAuditFor(record)}>
+                      <HistoryIcon size={13} />
                       History
                     </button>
                   </td>
@@ -148,6 +162,7 @@ export function CleaningRecordsPanel({ equipment, currentUserName }: CleaningRec
             disabled={!query.data?.pageInfo.hasNextPage}
           >
             Next
+            <ArrowRightIcon size={13} />
           </button>
         </div>
       </div>
