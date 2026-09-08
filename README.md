@@ -19,8 +19,8 @@ value) so the log is defensible in a regulatory audit.
 Requires Docker with Compose v2.
 
 ```bash
-git clone <repo-url>
-cd cleen-cleaning-log
+git clone https://github.com/Pulkit8121/leucine-home-assessment.git
+cd leucine-home-assessment
 docker compose up --build
 ```
 
