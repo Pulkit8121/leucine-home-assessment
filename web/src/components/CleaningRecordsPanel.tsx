@@ -129,7 +129,12 @@ export function CleaningRecordsPanel({ equipment, currentUserName }: CleaningRec
                         Edit
                       </button>
                     ) : null}
-                    <button type="button" className="btn-link" onClick={() => setAuditFor(record)}>
+                    <button
+                      type="button"
+                      className="btn-link"
+                      onClick={() => setAuditFor(record)}
+                      title="See every change made to this record, field by field"
+                    >
                       <HistoryIcon size={13} />
                       History
                     </button>

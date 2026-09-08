@@ -3,6 +3,7 @@ import { EquipmentList } from './components/EquipmentList';
 import { CleaningRecordsPanel } from './components/CleaningRecordsPanel';
 import { LoginPage } from './pages/LoginPage';
 import { LogoMark, ClipboardIcon } from './components/icons';
+import { HowItWorks } from './components/HowItWorks';
 import { useAuth } from './hooks/useAuth';
 import type { Equipment } from './api/types';
 
@@ -33,8 +34,8 @@ export function App() {
         <div className="brand">
           <LogoMark />
           <div>
-            <h1>Equipment Cleaning Log</h1>
-            <div className="subtitle">Every change is recorded with a field-level audit trail</div>
+            <h1>PureCycle</h1>
+            <div className="subtitle">Equipment cleaning log with a full audit trail</div>
           </div>
         </div>
         <div className="user">
@@ -50,6 +51,10 @@ export function App() {
           </button>
         </div>
       </header>
+
+      <div className="how-it-works-wrap">
+        <HowItWorks />
+      </div>
 
       <main className="layout">
         <EquipmentList

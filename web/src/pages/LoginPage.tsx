@@ -36,8 +36,8 @@ export function LoginPage() {
         <div className="login-brand">
           <LogoMark size={40} />
         </div>
-        <h1>Equipment Cleaning Log</h1>
-        <p className="login-subtitle">Sign in to record and verify cleanings.</p>
+        <h1>PureCycle</h1>
+        <p className="login-subtitle">Log equipment cleanings and verify them with a full audit trail.</p>
 
         <form onSubmit={onSubmit} className="login-form">
           {error ? <p className="alert">{error}</p> : null}

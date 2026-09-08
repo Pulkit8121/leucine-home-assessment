@@ -1,4 +1,4 @@
-# Equipment Cleaning Log
+# PureCycle — Equipment Cleaning Log
 
 A small full-stack slice of a pharmaceutical manufacturing system: equipment is cleaned
 between production runs, every cleaning is logged, and **every change to a cleaning
